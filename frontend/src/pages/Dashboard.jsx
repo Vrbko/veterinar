@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axiosConfig';
-import { FaTrash, FaCog } from 'react-icons/fa';
+import { FaTrash, FaCog, FaPlus, FaSyringe } from 'react-icons/fa';
 import '../styles/dashboard.css';
 
 export default function Dashboard() {
@@ -37,7 +37,9 @@ export default function Dashboard() {
   const goToNewAnimal = () => {
     navigate('/pet');
   };
-
+  const handleVaccinations = (id) => {
+    navigate(`/vaccinations/${id}`);
+  };
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this pet?')) return;
     try {
@@ -76,6 +78,12 @@ export default function Dashboard() {
                 <div className="pet-header">
                   <h3>{pet.nickname || '(No name)'}</h3>
                   <div className="pet-actions">
+
+                    <FaSyringe
+  className="action-icon add-icon"
+  title="Vaccines"
+  onClick={() => handleVaccinations(pet.id)}
+/>
                     <FaCog
                       className="action-icon"
                       title="Edit pet"

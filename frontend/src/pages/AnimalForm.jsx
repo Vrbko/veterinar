@@ -88,7 +88,7 @@ export default function AnimalForm() {
       }
     } catch (err) {
       console.error(err);
-      setMessage(isNew ? 'Error adding animal.' : 'Error updating animal.');
+      setMessage(isNew ? 'Error adding pet.' : 'Error updating pet.');
     }
   };
 
@@ -101,7 +101,7 @@ export default function AnimalForm() {
 
   return (
     <div className="form-container">
-      <h2>{isNew ? 'Add New Animal' : 'Edit Animal'}</h2>
+      <h2>{isNew ? 'Add New Pet' : 'Edit Pet'}</h2>
       <form onSubmit={handleSubmit}>
 
         <div className="form-group" style={{ marginBottom: '1rem' }}>

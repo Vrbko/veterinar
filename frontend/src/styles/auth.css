@@ -152,3 +152,94 @@ p {
 p.error {
   color: #dc3545; /* red for error */
 }
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header-icon {
+  margin-left: 0.5rem;
+  color: #4caf50;
+}
+
+.add-button {
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: #45a049;
+}
+
+.vaccination-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
+  gap: 1rem;
+}
+
+.vaccination-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.3s ease;
+}
+
+.vaccination-card:hover {
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+}
+
+.vaccination-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.7rem;
+}
+
+.vaccination-header h3 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.vaccination-actions {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.action-icon {
+  cursor: pointer;
+  color: #555;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+}
+
+.action-icon:hover {
+  color: #000;
+}
+
+.delete-icon:hover {
+  color: #e53935;
+}
+
+.vaccination-card p {
+  margin: 0.25rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}

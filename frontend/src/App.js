@@ -4,6 +4,8 @@ import SignUp from './pages/SignUp';
 import Registration from './pages/Registration';
 import Dashboard from './pages/Dashboard';
 import AnimalForm from './pages/AnimalForm';
+import VaccinationForm from './pages/VaccinationForm';
+import AllVacinations from './pages/AllVaccinations';
 
 function App() {
   return (
@@ -15,6 +17,10 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/pet" element={<AnimalForm />} />
         <Route path="/pet/:id" element={<AnimalForm />} />     
+        <Route path="vaccination" element={<VaccinationForm />} />   
+
+        <Route path="vaccinations" element={<AllVacinations />} />     
+        <Route path="vaccinations/:id" element={<AllVacinations />} />     
       </Routes>
     </Router>
   );

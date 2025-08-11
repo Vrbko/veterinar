@@ -78,12 +78,13 @@ app.use((req, res, next) => {
 });
 
 // Apply auth middleware conditionally
+/*
 app.use((req, res, next) => {
   if (req.path === '/signup' || req.path === '/login') {
     return next(); // skip auth for these routes
   }
   authenticateJWT(req, res, next);
-});
+});*/
 
 function authenticateJWT(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -284,6 +285,29 @@ app.delete('/animals/:id', async (req, res) => {
 app.get('/vaccinations', async (req, res) => {
   const [rows] = await db.query('SELECT * FROM vaccinations');
   res.json(rows);
+});
+
+app.get('/vaccinations/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.query(
+      'SELECT * FROM vaccinations WHERE animal_id = ?',
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Vaccination not found' });
+    }
+
+    // Prevent caching to avoid stale data
+    res.set('Cache-Control', 'no-store');
+
+    // Return single animal
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching vaccine:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 app.post('/vaccinations', async (req, res) => {
   const { animal_id, vaccine_type, vaccine_name, vaccination_date, valid_until } = req.body;

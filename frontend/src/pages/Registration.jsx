@@ -93,7 +93,7 @@ export default function Registration() {
 
   return (
     <div className="form-container">
-      <h2>Owner Registration</h2>
+      <h2>Owner Info</h2>
       <form onSubmit={handleSubmit}>
         {Object.keys(form)
           .filter((key) => key !== 'user_id')
