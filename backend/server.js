@@ -77,16 +77,30 @@ app.use((req, res, next) => {
   next();
 });
 
-function authenticateJWT(req, res, next) {
-  const token = req.cookies.token;
-  if (!token) return res.status(401).json({ error: 'Not authenticated' });
+// Apply auth middleware conditionally
+app.use((req, res, next) => {
+  if (req.path === '/signup' || req.path === '/login') {
+    return next(); // skip auth for these routes
+  }
+  authenticateJWT(req, res, next);
+});
 
-  jwt.verify(token, SECRET, (err, user) => {
+function authenticateJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
     req.user = user;
     next();
   });
 }
+
 
 
 // auth routes
@@ -166,21 +180,6 @@ res.json({
 });
 
 
-
-
-// Routes
-app.get('/health', async (req, res) => {
-  try {
-    const [rows] = await db.query('SELECT 1 AS ok');
-    res.json({ status: 'ok', db: rows[0].ok, uptime: process.uptime() });
-  } catch (err) {
-    res.status(500).json({ status: 'error', error: err.message });
-  }
-});
-
-app.get('/', (req, res) => {
-  res.send('Hello from Express with MySQL!');
-});
 // CRUD for owners
 app.get('/owners', async (req, res) => {
   const [rows] = await db.query('SELECT * FROM owners');
@@ -229,7 +228,7 @@ app.get('/animals', async (req, res) => {
   res.json(rows);
 });
 
-app.get('/animals/:id', async (req, res) => {
+app.get('/animals/user/:id', async (req, res) => {
   try {
     const [rows] = await db.query(
       'SELECT * FROM animals WHERE user_id = ?',
@@ -241,6 +240,30 @@ app.get('/animals/:id', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+
+app.get('/animals/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.query(
+      'SELECT * FROM animals WHERE id = ?',
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Animal not found' });
+    }
+
+    // Prevent caching to avoid stale data
+    res.set('Cache-Control', 'no-store');
+
+    // Return single animal
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error fetching animal:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 app.post('/animals', async (req, res) => {
   const { user_id, nickname, microchip_number, species, breed, gender, birth_date, height, weight } = req.body;
   const [result] = await db.query('INSERT INTO animals (user_id, nickname, microchip_number, species, breed, gender, birth_date, height, weight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [user_id, nickname, microchip_number, species, breed, gender, birth_date, height, weight]);
