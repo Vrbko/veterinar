@@ -36,15 +36,16 @@ const JWT_SECRET = process.env.JWT || 'your_jwt_secret';
 // Configuration
 const PORT = process.env.PORT || 3000;
 
+
 // MySQL connection setup
 let db;
 (async () => {
   try {
     db = await mysql.createPool({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASS || 'secretpass',
-      database: process.env.DB_NAME || 'veterinar',
+      host: process.env.DATABASE_HOST || 'localhost',
+      user: process.env.DATABASE_USER ,
+      password: process.env.DATABASE_PASSWORD ,
+      database: process.env.DATABASE_NAME ,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0

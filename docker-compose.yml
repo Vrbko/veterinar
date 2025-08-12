@@ -1,6 +1,6 @@
 version: "3.8"
-services:
 
+services:
   mysql:
     image: mysql:8.0
     restart: always
@@ -13,5 +13,34 @@ services:
       - mysql_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
 
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "3000:3000"   # change if your backend uses a different port
+    environment:
+      DATABASE_HOST: mysql
+      DATABASE_USER: root
+      DATABASE_PASSWORD: secretpass
+      DATABASE_NAME: veterinar
+      BACKEND_HOST: backend:3000
+
+    depends_on:
+      - mysql
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "80:3001"   # change if your frontend uses a different port
+    environment:
+      - PORT=3001
+    depends_on:
+      - backend
+
 volumes:
   mysql_data:
+
+networks:
+  app_network:
+    driver: bridge

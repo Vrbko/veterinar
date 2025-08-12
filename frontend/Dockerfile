@@ -1,6 +1,6 @@
 
 # Use the latest LTS version of Node.js
-FROM node:18-alpine
+FROM node:22-alpine
  
 # Set the working directory inside the container
 WORKDIR /app
@@ -9,13 +9,13 @@ WORKDIR /app
 COPY package*.json ./
  
 # Install dependencies
-RUN npm install
+RUN npm ci --only=production
  
 # Copy the rest of your application files
 COPY . .
  
 # Expose the port your app runs on
-EXPOSE 3000
+EXPOSE 3001
  
 # Define the command to run your app
 CMD ["npm", "start"]
