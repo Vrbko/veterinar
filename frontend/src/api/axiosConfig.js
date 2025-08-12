@@ -1,7 +1,7 @@
 import axios from 'axios';
 
   const instance = axios.create({
-    baseURL: process.env.BACKEND_HOST, // Docker service name
+    baseURL: "http://localhost:3000", // Docker service name
   });
 
 

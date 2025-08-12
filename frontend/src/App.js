@@ -4,7 +4,7 @@ import SignUp from './pages/SignUp';
 import Registration from './pages/Registration';
 import UserDashboard from './pages/Dashboard';
 import VetDashboard from './pages/VetDashboard';
-import AdminDashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import AnimalForm from './pages/AnimalForm';
 import VaccinationForm from './pages/VaccinationForm';
 import AllVaccinations from './pages/AllVaccinations';

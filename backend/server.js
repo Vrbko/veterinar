@@ -36,6 +36,27 @@ const JWT_SECRET = process.env.JWT || 'your_jwt_secret';
 // Configuration
 const PORT = process.env.PORT || 3000;
 
+async function ensureAdminUser() {
+  try {
+    const [rows] = await db.query('SELECT id FROM users WHERE role = ?', ['admin']);
+    if (rows.length > 0) {
+      console.log('✅ Admin user already exists');
+      return;
+    }
+
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+    await db.query(
+      'INSERT INTO users (username, password_hash, role, active) VALUES (?, ?, ?, ?)',
+      ['Admin', hashedPassword, 'admin', 'yes']
+    );
+
+    console.log(`🚀 Admin created`);
+  } catch (err) {
+    console.error('Error ensuring admin user:', err);
+  }
+}
 
 // MySQL connection setup
 let db;
@@ -51,6 +72,8 @@ let db;
       queueLimit: 0
     });
     console.log('Connected to MySQL database');
+    await ensureAdminUser();
+
   } catch (err) {
     console.error('Error connecting to MySQL:', err);
     process.exit(1);

@@ -84,7 +84,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       <header>
-        <h1>Welcome vet, {user?.username || 'Guest'}!</h1>
+        <h1>Welcome Vet, {user?.username || 'Guest'}!</h1>
         <div className="buttons">
           <button onClick={goToVaccinations}>Vaccinations</button>
           <button onClick={handleLogout}>Logout</button>

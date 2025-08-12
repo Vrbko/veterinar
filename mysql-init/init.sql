@@ -47,13 +47,9 @@ CREATE TABLE vaccinations (
     FOREIGN KEY (animal_id) REFERENCES animals(id)
 );
 
-/*
--- Create sample users
-INSERT INTO users (username, password_hash, role, active ) VALUES
-('adminuser', '$2b$10$examplehashforadmin', 'admin', "yes"),
-('vetuser', '$2b$10$examplehashforvet', 'vet', "yes"),
-('owneruser', '$2b$10$examplehashforowner', 'owner', "yes");
 
+
+/*
 -- Create sample owners
 INSERT INTO owners (user_id, first_name, last_name, emso, birth_date, email, phone, address) VALUES
 (1,'John', 'Doe', '1234567890123', '1980-05-15', 'john.doe@example.com', '+123456789', '123 Elm Street'),
