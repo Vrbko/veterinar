@@ -149,7 +149,7 @@ app.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid)
       return res.status(401).json({ error: 'Invalid credentials' });
-    
+
     const active = user["active"];
     if (active != "yes")
       return res.status(401).json({ error: 'Innactive account, contant your administrator' });
@@ -230,6 +230,24 @@ app.delete('/owners/:id', async (req, res) => {
 app.get('/animals', async (req, res) => {
   const [rows] = await db.query('SELECT * FROM animals');
   res.json(rows);
+});
+
+app.get('/animals/search/:query', async (req, res) => {
+  const query = req.params.query;
+  
+  try {
+    // Use parameterized query to avoid SQL injection
+    const [rows] = await db.query(
+      `SELECT * FROM animals
+       WHERE nickname LIKE ? OR breed LIKE ? OR species LIKE ?`,
+      [`%${query}%`, `%${query}%`, `%${query}%`]
+    );
+    
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database query failed' });
+  }
 });
 
 app.get('/animals/user/:id', async (req, res) => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../api/axiosConfig';
 import { FaTrash, FaCog, FaPlus, FaSyringe } from 'react-icons/fa';
 import '../styles/dashboard.css';
@@ -10,26 +10,48 @@ import '../styles/searchbar.css';
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Optional: parse query param from URL for initial load, if you want URL sync
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('search') || '';
+    setSearchQuery(q);
+  }, [location.search]);
 
   useEffect(() => {
-    if (user?.userId) {
-      axios.get(`/animals/`)
-        .then(res => {
-          setPets(res.data);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error(err);
-          setLoading(false);
-        });
-    }
-  }, [user]);
+    if (!user?.userId) return; // no user, no fetch
 
-    const handleSearch = (query) => {
-    console.log('Search query:', query);
-    // Add your filtering logic here
+    setLoading(true);
+
+    const endpoint = searchQuery
+      ? `/animals/search/${searchQuery}`
+      : '/animals';
+
+    axios.get(endpoint)
+      .then(res => {
+        setPets(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [user, searchQuery]);
+
+  // When user types and clicks search, update searchQuery state and optionally URL
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+
+    // Optional: update URL query param so it's shareable/bookmarkable
+    navigate({
+      pathname: '/vet-dashboard',
+      search: query ? `?search=${encodeURIComponent(query)}` : ''
+    });
   };
 
   const handleLogout = () => {
@@ -37,13 +59,14 @@ export default function Dashboard() {
     navigate('/login');
   };
 
- 
   const goToVaccinations = () => {
     navigate('/vaccinations');
   };
-   const handleVaccinations = (name, id) => {
+
+  const handleVaccinations = (name, id) => {
     navigate(`/vaccinations/${name}/${id}`);
   };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this pet?')) return;
     try {
@@ -62,19 +85,17 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <header>
         <h1>Welcome vet, {user?.username || 'Guest'}!</h1>
-         
-     
-
         <div className="buttons">
           <button onClick={goToVaccinations}>Vaccinations</button>
           <button onClick={handleLogout}>Logout</button>
         </div>
       </header>
- <SearchBar onSearch={handleSearch} />
+
+      <SearchBar onSearch={handleSearch} />
+
       <section className="pets-section">
         <h2>All the pets in your clinic</h2>
 
-     
         {loading ? (
           <p>Loading pets...</p>
         ) : pets.length === 0 ? (
@@ -85,20 +106,17 @@ export default function Dashboard() {
               <li key={pet.id} className="pet-card">
                 <div className="pet-header">
                   <h3>{pet.nickname || '(No name)'}</h3>
-                 <div className="pet-actions">
-
+                  <div className="pet-actions">
                     <FaSyringe
-  className="action-icon add-icon"
-  title="Vaccines"
-  onClick={() => handleVaccinations(pet.nickname,pet.id)}
-/>
+                      className="action-icon add-icon"
+                      title="Vaccines"
+                      onClick={() => handleVaccinations(pet.nickname, pet.id)}
+                    />
                     <FaCog
                       className="action-icon"
                       title="Edit pet"
                       onClick={() => handleSettings(pet.id)}
                     />
-  
-              
                     <FaTrash
                       className="action-icon delete-icon"
                       title="Delete pet"

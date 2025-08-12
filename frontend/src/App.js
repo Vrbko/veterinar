@@ -31,7 +31,8 @@ function App() {
 
         <Route path="/pet" element={<ProtectedRoute><AnimalForm /></ProtectedRoute>} />
         <Route path="/pet/:id" element={<ProtectedRoute><AnimalForm /></ProtectedRoute>} />
-        <Route path="/vaccination" element={<ProtectedRoute><VaccinationForm /></ProtectedRoute>} />
+        <Route path="/vaccination/add/:id" element={<ProtectedRoute><VaccinationForm /></ProtectedRoute>} />
+        <Route path="/vaccination/edit/:id" element={<ProtectedRoute><VaccinationForm /></ProtectedRoute>} />
         <Route path="/vaccinations" element={<ProtectedRoute><AllVaccinations /></ProtectedRoute>} />
         <Route path="/vaccinations/:id" element={<ProtectedRoute><AllVaccinations /></ProtectedRoute>} />
         <Route path="/vaccinations/:name/:id" element={<ProtectedRoute><AllVaccinations /></ProtectedRoute>} />

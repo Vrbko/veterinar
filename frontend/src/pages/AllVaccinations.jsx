@@ -54,11 +54,11 @@ useEffect(() => {
   };
 
   const handleEdit = (editId) => {
-    navigate(`/vaccination/${editId}`);
+    navigate(`/vaccination/edit/${editId}`);
   };
 
-  const handleAdd = () => {
-    navigate('/vaccination');
+  const handleAdd = (id) => {
+    navigate(`/vaccination/add/${id}`);
   };
 
   return (
@@ -68,7 +68,7 @@ useEffect(() => {
 All Vaccinations {name && `(For ${name})`} <FaSyringe className="header-icon" />
         </h1>
         {user?.role === 'vet' && (
-  <button onClick={handleAdd} className="add-button">
+  <button onClick={() => handleAdd(id)} className="add-button">
     <FaPlus /> Add Vaccination
   </button>
 )}

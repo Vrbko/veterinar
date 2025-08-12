@@ -20,7 +20,7 @@ export default function VaccinationForm() {
   // Format date for input[type=date]
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
-    return dateString.split('T')[0]; // strip time if ISO format
+    return dateString.split('T')[0];
   };
 
   // Fetch existing vaccination if editing
@@ -59,7 +59,7 @@ export default function VaccinationForm() {
         await axios.put(`/vaccinations/${id}`, form);
         setMessage('Vaccination updated successfully!');
       }
-      navigate('/dashboard'); // or wherever you want to redirect
+      navigate('/dashboard');
     } catch (err) {
       console.error(err);
       setMessage(isNew ? 'Error adding vaccination.' : 'Error updating vaccination.');
@@ -78,6 +78,7 @@ export default function VaccinationForm() {
           value={form.animal_id}
           onChange={handleChange}
           required
+          disabled={!isNew}  // <-- disable if editing (not new)
         />
 
         <label htmlFor="vaccine_type">Vaccine Type</label>

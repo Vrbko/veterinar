@@ -2,19 +2,17 @@
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 700px;
-  margin: 1.5rem 0;          /* no horizontal auto margin for left align */
+  max-width: 500px;
+  margin: auto auto;          /* no horizontal auto margin for left align */
   border-radius: 6px;
   overflow: hidden;
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  justify-content: flex-start; /* align left */
-  gap: 0;
 }
 
 .search-input {
-  flex-grow: 1;
+  flex: 1;                   /* better than flex-grow for full control */
   border: none;
   padding: 0.75rem 1.2rem;
   font-size: 1.1rem;
@@ -22,6 +20,7 @@
   outline: none;
   height: 40px;             /* fix height */
   box-sizing: border-box;
+  margin: 0;                /* ensure no margin */
 }
 
 .search-input::placeholder {
@@ -33,7 +32,7 @@
   background-color: #007bff;
   border: none;
   color: white;
-  padding: 0 1rem;          /* horizontal padding only */
+  padding: 0 1.5rem;        /* increased padding for better appearance */
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -44,6 +43,7 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+  flex-shrink: 0;           /* prevent button from shrinking */
 }
 
 .search-button:hover {
