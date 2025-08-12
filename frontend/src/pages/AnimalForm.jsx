@@ -90,7 +90,15 @@ export default function AnimalForm() {
           weight: parseFloat(form.weight)
         });
         setMessage('Animal added successfully!');
-        navigate('/dashboard');
+          if (user.role === 'vet') {
+    navigate('/vet-dashboard');
+  } else if (user.role === 'admin') {
+    navigate('/admin-dashboard');
+  } else if (user.role === 'owner') {
+    navigate('/user-dashboard');
+  } else {
+    navigate('/login'); // fallback maybe
+  }
       } else {
         await axios.put(`/animals/${id}`, {
           ...form,
@@ -98,11 +106,15 @@ export default function AnimalForm() {
           height: parseFloat(form.height),
           weight: parseFloat(form.weight)
         });
-        setMessage(
-          <>
-            Data updated successfully! <Link to="/dashboard">Go Back</Link>
-          </>
-        );
+                if (user.role === 'vet') {
+    navigate('/vet-dashboard');
+  } else if (user.role === 'admin') {
+    navigate('/admin-dashboard');
+  } else if (user.role === 'owner') {
+    navigate('/user-dashboard');
+  } else {
+    navigate('/login'); // fallback maybe
+  }
       }
     } catch (err) {
       console.error(err);

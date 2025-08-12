@@ -380,11 +380,30 @@ app.post('/users', async (req, res) => {
   const [result] = await db.query('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', [username, password_hash, role]);
   res.json({ id: result.insertId });
 });
-app.put('/users/:id', async (req, res) => {
-  const { id } = req.params;
-  const { username, password_hash, role } = req.body;
-  await db.query('UPDATE users SET username=?, password_hash=?, role=? WHERE id=?', [username, password_hash, role, id]);
-  res.json({ success: true });
+app.patch('/users/:userId', async (req, res) => {
+  const userId = parseInt(req.params.userId, 10);
+  const { active } = req.body;
+
+  // Validate inputs
+  if (!userId || !['yes', 'no'].includes(active)) {
+    return res.status(400).json({ error: 'Invalid userId or active status' });
+  }
+
+  try {
+    const [result] = await db.execute(
+      'UPDATE users SET active = ? WHERE id = ?',
+      [active, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({ message: 'User active status updated successfully' });
+  } catch (err) {
+    console.error('Error updating user active status:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 });
 app.delete('/users/:id', async (req, res) => {
   await db.query('DELETE FROM users WHERE id=?', [req.params.id]);

@@ -1,142 +1,188 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from '../api/axiosConfig';
-import { FaTrash, FaCog, FaPlus, FaSyringe } from 'react-icons/fa';
 import '../styles/dashboard.css';
-import SearchBar from '../context/SearchBar';
-import '../styles/searchbar.css';
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const [pets, setPets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  // Users state and loading
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [statusChanges, setStatusChanges] = useState({});
 
-  // Optional: parse query param from URL for initial load, if you want URL sync
+  // Owners and animals states
+  const [owners, setOwners] = useState([]);
+  const [animals, setAnimals] = useState([]);
+  const [loadingOwners, setLoadingOwners] = useState(true);
+  const [loadingAnimals, setLoadingAnimals] = useState(true);
+
+  // Fetch users
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const q = params.get('search') || '';
-    setSearchQuery(q);
-  }, [location.search]);
+    if (!user?.userId) return;
 
-  useEffect(() => {
-    if (!user?.userId) return; // no user, no fetch
-
-    setLoading(true);
-
-    const endpoint = searchQuery
-      ? `/animals/search/${searchQuery}`
-      : '/animals';
-
-    axios.get(endpoint)
+    setLoadingUsers(true);
+    axios.get('/users')
       .then(res => {
-        setPets(res.data);
-        setLoading(false);
+        setUsers(res.data);
+        setLoadingUsers(false);
       })
       .catch(err => {
         console.error(err);
-        setLoading(false);
+        setLoadingUsers(false);
       });
-  }, [user, searchQuery]);
+  }, [user]);
 
-  // When user types and clicks search, update searchQuery state and optionally URL
-  const handleSearch = (query) => {
-    setSearchQuery(query);
+  // Fetch owners and animals
+  useEffect(() => {
+    setLoadingOwners(true);
+    setLoadingAnimals(true);
 
-    // Optional: update URL query param so it's shareable/bookmarkable
-    navigate({
-      pathname: '/admin-dashboard',
-      search: query ? `?search=${encodeURIComponent(query)}` : ''
-    });
-  };
+    axios.get('/owners')
+      .then(res => {
+        setOwners(res.data);
+        setLoadingOwners(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoadingOwners(false);
+      });
+
+    axios.get('/animals')
+      .then(res => {
+        setAnimals(res.data);
+        setLoadingAnimals(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoadingAnimals(false);
+      });
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const goToVaccinations = () => {
-    navigate('/vaccinations');
+  const handleActiveChange = (userId, newStatus) => {
+    setStatusChanges(prev => ({
+      ...prev,
+      [userId]: newStatus
+    }));
   };
 
-  const handleVaccinations = (name, id) => {
-    navigate(`/vaccinations/${name}/${id}`);
-  };
+const handleSetActive = async (userId) => {
+  const newStatus = statusChanges[userId];
+  if (!newStatus) {
+    alert('No change detected');
+    return;
+  }
+  try {
+    await axios.patch(`/users/${userId}`, { active: newStatus });
+    setUsers(prevUsers =>
+      prevUsers.map(u =>
+        u.id === userId ? { ...u, active: newStatus } : u
+      )
+    );
+    setStatusChanges(prev => {
+      const copy = { ...prev };
+      delete copy[userId];
+      return copy;
+    });
+    alert('User active status updated successfully!');  // Success popup
+  } catch (err) {
+    console.error('Error updating user active status:', err);
+    alert('Failed to update active status');  // Failure popup
+  }
+};
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this pet?')) return;
-    try {
-      await axios.delete(`/animals/${id}`);
-      setPets((prevPets) => prevPets.filter((pet) => pet.id !== id));
-    } catch (err) {
-      console.error('Error deleting pet:', err);
-    }
-  };
-
-  const handleSettings = (id) => {
-    navigate(`/pet/${id}`);
-  };
 
   return (
     <div className="dashboard-container">
       <header>
         <h1>Welcome Admin, {user?.username || 'Guest'}!</h1>
-        <div className="buttons">
-          <button onClick={goToVaccinations}>Vaccinations</button>
-          <button onClick={handleLogout}>Logout</button>
-        </div>
+        <button onClick={handleLogout}>Logout</button>
       </header>
+    <div className="ui-container">
 
-      <SearchBar onSearch={handleSearch} />
+      <div className="side-panel users-panel">
+        <section>
+          <h2>Users</h2>
+          {loadingUsers ? (
+            <p>Loading users...</p>
+          ) : users.length === 0 ? (
+            <p>No users found.</p>
+          ) : (
+            <table className="user-table">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Active Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(({ id, username, role, active }) => {
+                  const changedStatus = statusChanges[id];
+                  return (
+                    <tr key={id}>
+                      <td>{username}</td>
+                      <td>{role}</td>
+                      <td>
+                        <select
+                          value={changedStatus || active}
+                          onChange={e => handleActiveChange(id, e.target.value)}
+                        >
+                          <option value="yes">Yes</option>
+                          <option value="no">No</option>
+                        </select>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleSetActive(id)}
+                          disabled={!statusChanges[id]}
+                        >
+                          Set
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </section>
+      </div>
 
-      <section className="pets-section">
-        <h2>All the pets in your clinic</h2>
+      <div className="side-panel right-panel">
+        <div className="owners-box">
+          <h2>Owners</h2>
+          {loadingOwners ? <p>Loading owners...</p> : (
+            <ul>
+              {owners.map(o => (
+                <li key={o.id}>{o.username}</li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-        {loading ? (
-          <p>Loading pets...</p>
-        ) : pets.length === 0 ? (
-          <p>No pets registered yet.</p>
-        ) : (
-          <ul className="pet-list">
-            {pets.map((pet) => (
-              <li key={pet.id} className="pet-card">
-                <div className="pet-header">
-                  <h3>{pet.nickname || '(No name)'}</h3>
-                  <div className="pet-actions">
-                    <FaSyringe
-                      className="action-icon add-icon"
-                      title="Vaccines"
-                      onClick={() => handleVaccinations(pet.nickname, pet.id)}
-                    />
-                    <FaCog
-                      className="action-icon"
-                      title="Edit pet"
-                      onClick={() => handleSettings(pet.id)}
-                    />
-                    <FaTrash
-                      className="action-icon delete-icon"
-                      title="Delete pet"
-                      onClick={() => handleDelete(pet.id)}
-                    />
-                  </div>
-                </div>
-                <p><strong>Species:</strong> {pet.species}</p>
-                {pet.breed && <p><strong>Breed:</strong> {pet.breed}</p>}
-                {pet.gender && <p><strong>Gender:</strong> {pet.gender}</p>}
-                {pet.birth_date && (
-                  <p><strong>Birth Date:</strong> {new Date(pet.birth_date).toLocaleDateString()}</p>
-                )}
-                {pet.height && <p><strong>Height:</strong> {pet.height} cm</p>}
-                {pet.weight && <p><strong>Weight:</strong> {pet.weight} kg</p>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <div className="animals-box">
+          <h2>Animals</h2>
+          {loadingAnimals ? <p>Loading animals...</p> : (
+            <ul>
+              {animals.map(a => (
+                <li key={a.id}>
+                  {a.nickname || '(No name)'} — {a.species}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
     </div>
   );
 }

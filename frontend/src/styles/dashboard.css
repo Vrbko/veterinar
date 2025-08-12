@@ -108,3 +108,96 @@
 .delete-icon {
   color: red;
 }
+.ui-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  height: 80vh;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  flex-direction: row; /* for header + panels */
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.side-panel {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.dashboard-container > .side-panel {
+  flex: 1;
+  overflow: hidden;
+  height: 60vh; /* fixed height for panels below header */
+}
+
+.users-panel {
+  max-width: 600px;
+  overflow-y: auto;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 60vh;
+}
+
+.owners-box,
+.animals-box {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th,
+.user-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.user-table th {
+  background-color: #eee;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+li {
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  color: #333;
+}
