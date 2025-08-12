@@ -109,7 +109,7 @@ function authenticateJWT(req, res, next) {
 app.post('/signup', async (req, res) => {
   let active = "no";
   const { username, password, role } = req.body;
-  console.log(req.body);
+  //console.log(req.body);
   if (!username || !password || !role)
     return res.status(400).json({ error: 'Missing fields' });
   if (!['owner', 'vet', 'admin'].includes(role))
@@ -144,11 +144,15 @@ app.post('/login', async (req, res) => {
     const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
     const user = rows[0];
     if (!user)
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'User not found' });
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid)
       return res.status(401).json({ error: 'Invalid credentials' });
+    
+    const active = user["active"];
+    if (active != "yes")
+      return res.status(401).json({ error: 'Innactive account, contant your administrator' });
 
     // Create JWT payload (you can add more user info if needed)
     const payload = {
@@ -170,8 +174,7 @@ app.post('/login', async (req, res) => {
 
     // backend change
 res.json({
-  token,
-  user: payload
+  token
 });
 
   } catch (err) {
@@ -207,7 +210,7 @@ app.get('/owners/:id', async (req, res) => {
 });
 
 app.post('/owners', async (req, res) => {
-  console.log(req);
+  //console.log(req);
   const {user_id, first_name, last_name, emso, birth_date, email, phone, address } = req.body;
   const [result] = await db.query('INSERT INTO owners (user_id, first_name, last_name, emso, birth_date, email, phone, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [user_id,first_name, last_name, emso, birth_date, email, phone, address]);
   res.json({ id: result.insertId });

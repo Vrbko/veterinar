@@ -29,6 +29,7 @@ export default function Registration() {
   });
 
   useEffect(() => {
+    
     const fetchOwnerData = async () => {
       try {
         if (!user?.userId) return;

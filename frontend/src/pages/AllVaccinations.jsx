@@ -3,12 +3,15 @@ import axios from '../api/axiosConfig';
 import { FaTrash, FaCog, FaPlus, FaSyringe } from 'react-icons/fa';
 import '../styles/dashboard.css';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
 
 export default function AllVaccinations() {
   const [vaccinations, setVaccinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { id } = useParams();  // get optional id parameter
+  const { id, name } = useParams();  // get optional id parameter
+  const { user } = useAuth();
 
 useEffect(() => {
   setLoading(true);
@@ -62,11 +65,13 @@ useEffect(() => {
     <div className="dashboard-container">
       <header className="dashboard-header">
         <h1>
-          Vaccinations <FaSyringe className="header-icon" />
+All Vaccinations {name && `(For ${name})`} <FaSyringe className="header-icon" />
         </h1>
-        <button onClick={handleAdd} className="add-button">
-          <FaPlus /> Add Vaccination
-        </button>
+        {user?.role === 'vet' && (
+  <button onClick={handleAdd} className="add-button">
+    <FaPlus /> Add Vaccination
+  </button>
+)}
       </header>
 
       <section className="vaccinations-section">
@@ -80,6 +85,7 @@ useEffect(() => {
               <li key={vaccine.id} className="vaccination-card">
                 <div className="vaccination-header">
                   <h3>{vaccine.vaccine_name || vaccine.vaccine_type}</h3>
+                          {user?.role === 'vet' && (
                   <div className="vaccination-actions">
                     <FaCog
                       className="action-icon"
@@ -91,7 +97,7 @@ useEffect(() => {
                       title="Delete vaccination"
                       onClick={() => handleDelete(vaccine.id)}
                     />
-                  </div>
+                  </div>)}
                 </div>
                 <p><strong>Vaccine Name:</strong> {vaccine.vaccine_name || '-'}</p>
                 <p><strong>Vaccine Type:</strong> {vaccine.vaccine_type}</p>

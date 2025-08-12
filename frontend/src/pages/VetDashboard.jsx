@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../api/axiosConfig';
 import { FaTrash, FaCog, FaPlus, FaSyringe } from 'react-icons/fa';
 import '../styles/dashboard.css';
+import SearchBar from '../context/SearchBar';
+import '../styles/searchbar.css';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -13,7 +15,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user?.userId) {
-      axios.get(`/animals/user/${user.userId}`)
+      axios.get(`/animals/`)
         .then(res => {
           setPets(res.data);
           setLoading(false);
@@ -25,19 +27,21 @@ export default function Dashboard() {
     }
   }, [user]);
 
+    const handleSearch = (query) => {
+    console.log('Search query:', query);
+    // Add your filtering logic here
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const goToRegistration = () => {
-    navigate('/register');
+ 
+  const goToVaccinations = () => {
+    navigate('/vaccinations');
   };
-
-  const goToNewAnimal = () => {
-    navigate('/pet');
-  };
-  const handleVaccinations = (name, id) => {
+   const handleVaccinations = (name, id) => {
     navigate(`/vaccinations/${name}/${id}`);
   };
   const handleDelete = async (id) => {
@@ -57,16 +61,20 @@ export default function Dashboard() {
   return (
     <div className="dashboard-container">
       <header>
-        <h1>Welcome owner, {user?.username || 'Guest'}!</h1>
+        <h1>Welcome vet, {user?.username || 'Guest'}!</h1>
+         
+     
+
         <div className="buttons">
-          <button onClick={goToNewAnimal}>New Pet</button>
-          <button onClick={goToRegistration}>My Info</button>
+          <button onClick={goToVaccinations}>Vaccinations</button>
           <button onClick={handleLogout}>Logout</button>
         </div>
       </header>
-
+ <SearchBar onSearch={handleSearch} />
       <section className="pets-section">
-        <h2>Your Pets</h2>
+        <h2>All the pets in your clinic</h2>
+
+     
         {loading ? (
           <p>Loading pets...</p>
         ) : pets.length === 0 ? (
@@ -77,7 +85,7 @@ export default function Dashboard() {
               <li key={pet.id} className="pet-card">
                 <div className="pet-header">
                   <h3>{pet.nickname || '(No name)'}</h3>
-                  <div className="pet-actions">
+                 <div className="pet-actions">
 
                     <FaSyringe
   className="action-icon add-icon"
@@ -90,6 +98,12 @@ export default function Dashboard() {
                       onClick={() => handleSettings(pet.id)}
                     />
   
+              
+                    <FaTrash
+                      className="action-icon delete-icon"
+                      title="Delete pet"
+                      onClick={() => handleDelete(pet.id)}
+                    />
                   </div>
                 </div>
                 <p><strong>Species:</strong> {pet.species}</p>
