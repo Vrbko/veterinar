@@ -9,6 +9,7 @@ import AnimalForm from './pages/AnimalForm';
 import VaccinationForm from './pages/VaccinationForm';
 import AllVaccinations from './pages/AllVaccinations';
 import ProtectedRoute from "./context/ProtectedRoutes";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/register" element={<Registration />} />
+        <Route path="/register/:id" element={<Registration />} />
 
         {/* Protected */}
         <Route path="/user-dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
@@ -30,8 +32,8 @@ function App() {
         <Route path="/pet" element={<ProtectedRoute><AnimalForm /></ProtectedRoute>} />
         <Route path="/pet/:id" element={<ProtectedRoute><AnimalForm /></ProtectedRoute>} />
 
-        <Route path="/vaccination/add/:id" element={<ProtectedRoute><VaccinationForm /></ProtectedRoute>} />
-        <Route path="/vaccination/edit/:id" element={<ProtectedRoute><VaccinationForm /></ProtectedRoute>} />
+        <Route path="/vaccination/add/:animalId" element={<ProtectedRoute><VaccinationForm /></ProtectedRoute>} />
+        <Route path="/vaccination/edit/:vaxId" element={<ProtectedRoute><VaccinationForm /></ProtectedRoute>} />
         
         <Route path="/vaccinations" element={<ProtectedRoute><AllVaccinations /></ProtectedRoute>} />
         <Route path="/vaccinations/:id" element={<ProtectedRoute><AllVaccinations /></ProtectedRoute>} />

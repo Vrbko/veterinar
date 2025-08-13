@@ -1,0 +1,52 @@
+.form-container {
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.form-container h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.vaccination-form .form-group {
+  margin-bottom: 15px;
+}
+
+.vaccination-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.vaccination-form input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn-submit {
+  background: #28a745;
+  color: #fff;
+  padding: 10px 15px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background: #218838;
+}
+
+.form-message {
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
+}

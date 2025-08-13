@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axiosConfig';
 import { useNavigate, useParams } from 'react-router-dom';
+import '../styles/form.css';
 
 export default function VaccinationForm() {
   const navigate = useNavigate();
-  const { id } = useParams(); // vaccination id from /vaccinations/:id
-  const [isNew, setIsNew] = useState(true);
+  const { animalId, vaxId } = useParams();
+
+  const isEditMode = Boolean(vaxId);
+  const isAddMode = Boolean(animalId);
 
   const [form, setForm] = useState({
     animal_id: '',
@@ -14,21 +17,16 @@ export default function VaccinationForm() {
     vaccination_date: '',
     valid_until: ''
   });
-
   const [message, setMessage] = useState('');
 
-  // Format date for input[type=date]
-  const formatDateForInput = (dateString) => {
-    if (!dateString) return '';
-    return dateString.split('T')[0];
-  };
+  const formatDateForInput = (dateString) => dateString ? dateString.split('T')[0] : '';
 
-  // Fetch existing vaccination if editing
   useEffect(() => {
-    if (id) {
-      axios.get(`/vaccinations/${id}`)
+    if (isEditMode) {
+      // Fetch existing vaccination data for edit
+      axios.get(`/vaccinations/vacc/${vaxId}`)
         .then(res => {
-          const vax = res.data;
+          const vax = res.data; // If backend wraps, might need res.data.data
           setForm({
             animal_id: vax.animal_id || '',
             vaccine_type: vax.vaccine_type || '',
@@ -36,13 +34,13 @@ export default function VaccinationForm() {
             vaccination_date: formatDateForInput(vax.vaccination_date),
             valid_until: formatDateForInput(vax.valid_until)
           });
-          setIsNew(false);
         })
-        .catch(err => {
-          console.error('Error fetching vaccination:', err);
-        });
+        .catch(err => console.error('Error fetching vaccination:', err));
+    } else if (isAddMode) {
+      // Pre-fill animal_id for adding
+      setForm(prev => ({ ...prev, animal_id: animalId }));
     }
-  }, [id]);
+  }, [animalId, vaxId, isEditMode, isAddMode]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,76 +50,90 @@ export default function VaccinationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (isNew) {
-        await axios.post('/vaccinations', form);
-        setMessage('Vaccination added successfully!');
+      if (isEditMode) {
+        await axios.put(`/vaccinations/${vaxId}`, form);
+        setMessage('✅ Vaccination updated successfully!');
       } else {
-        await axios.put(`/vaccinations/${id}`, form);
-        setMessage('Vaccination updated successfully!');
+        await axios.post('/vaccinations', form);
+        setMessage('✅ Vaccination added successfully!');
       }
-      navigate('/dashboard');
+      setTimeout(() => navigate('/vet-dashboard'), 1000);
     } catch (err) {
       console.error(err);
-      setMessage(isNew ? 'Error adding vaccination.' : 'Error updating vaccination.');
+      setMessage(isEditMode ? '❌ Error updating vaccination.' : '❌ Error adding vaccination.');
     }
   };
 
   return (
     <div className="form-container">
-      <h2>{isNew ? 'Add Vaccination' : 'Edit Vaccination'}</h2>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="animal_id">Animal ID</label>
-        <input
-          type="number"
-          id="animal_id"
-          name="animal_id"
-          value={form.animal_id}
-          onChange={handleChange}
-          required
-          disabled={!isNew}  // <-- disable if editing (not new)
-        />
+      <h2>{isEditMode ? '✏️ Edit Vaccination' : '➕ Add Vaccination'}</h2>
+      <form onSubmit={handleSubmit} className="vaccination-form">
+        
+        <div className="form-group">
+          <label htmlFor="animal_id">Animal ID</label>
+          <input
+            type="number"
+            id="animal_id"
+            name="animal_id"
+            value={form.animal_id}
+            onChange={handleChange}
+            required
+            disabled // Always disabled in both modes
+          />
+        </div>
 
-        <label htmlFor="vaccine_type">Vaccine Type</label>
-        <input
-          type="text"
-          id="vaccine_type"
-          name="vaccine_type"
-          value={form.vaccine_type}
-          onChange={handleChange}
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="vaccine_type">Vaccine Type</label>
+          <input
+            type="text"
+            id="vaccine_type"
+            name="vaccine_type"
+            value={form.vaccine_type}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-        <label htmlFor="vaccine_name">Vaccine Name</label>
-        <input
-          type="text"
-          id="vaccine_name"
-          name="vaccine_name"
-          value={form.vaccine_name}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <label htmlFor="vaccine_name">Vaccine Name</label>
+          <input
+            type="text"
+            id="vaccine_name"
+            name="vaccine_name"
+            value={form.vaccine_name}
+            onChange={handleChange}
+          />
+        </div>
 
-        <label htmlFor="vaccination_date">Vaccination Date</label>
-        <input
-          type="date"
-          id="vaccination_date"
-          name="vaccination_date"
-          value={form.vaccination_date}
-          onChange={handleChange}
-          required
-        />
+        <div className="form-group">
+          <label htmlFor="vaccination_date">Vaccination Date</label>
+          <input
+            type="date"
+            id="vaccination_date"
+            name="vaccination_date"
+            value={form.vaccination_date}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-        <label htmlFor="valid_until">Valid Until</label>
-        <input
-          type="date"
-          id="valid_until"
-          name="valid_until"
-          value={form.valid_until}
-          onChange={handleChange}
-        />
+        <div className="form-group">
+          <label htmlFor="valid_until">Valid Until</label>
+          <input
+            type="date"
+            id="valid_until"
+            name="valid_until"
+            value={form.valid_until}
+            onChange={handleChange}
+          />
+        </div>
 
-        <button type="submit">{isNew ? 'Add Vaccination' : 'Update Vaccination'}</button>
+        <button type="submit" className="btn-submit">
+          {isEditMode ? '💾 Save Changes' : '💾 Add Vaccination'}
+        </button>
       </form>
-      {message && <p>{message}</p>}
+
+      {message && <p className="form-message">{message}</p>}
     </div>
   );
 }

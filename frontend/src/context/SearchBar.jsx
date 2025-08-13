@@ -17,7 +17,7 @@ export default function SearchBar({ onSearch }) {
         onChange={handleChange}
         className="search-input"
       />
-      <button className="search-button" aria-label="Search">
+      <button className="btn btn-primary" aria-label="Search">
         🔍
       </button>
     </div>

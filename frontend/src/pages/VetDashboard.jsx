@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from '../api/axiosConfig';
-import { FaTrash, FaCog, FaPlus, FaSyringe } from 'react-icons/fa';
+import { FaTrash, FaCog, FaSyringe } from 'react-icons/fa';
 import '../styles/dashboard.css';
 import SearchBar from '../context/SearchBar';
 import '../styles/searchbar.css';
@@ -13,41 +13,49 @@ export default function Dashboard() {
   const location = useLocation();
 
   const [pets, setPets] = useState([]);
+  const [filteredPets, setFilteredPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Optional: parse query param from URL for initial load, if you want URL sync
+  // Load search term from URL (optional)
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const q = params.get('search') || '';
     setSearchQuery(q);
   }, [location.search]);
 
+  // Fetch all pets once
   useEffect(() => {
-    if (!user?.userId) return; // no user, no fetch
-
+    if (!user?.userId) return;
     setLoading(true);
 
-    const endpoint = searchQuery
-      ? `/animals/search/${searchQuery}`
-      : '/animals';
-
-    axios.get(endpoint)
+    axios.get('/animals')
       .then(res => {
         setPets(res.data);
-        setLoading(false);
+        setFilteredPets(res.data); // initially show all
       })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [user, searchQuery]);
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  }, [user]);
 
-  // When user types and clicks search, update searchQuery state and optionally URL
+  // Filter locally whenever search changes
+  useEffect(() => {
+    const query = searchQuery.toLowerCase();
+    if (!query) {
+      setFilteredPets(pets);
+    } else {
+      setFilteredPets(
+        pets.filter(pet =>
+          Object.values(pet).some(val =>
+            val?.toString().toLowerCase().includes(query)
+          )
+        )
+      );
+    }
+  }, [searchQuery, pets]);
+
   const handleSearch = (query) => {
     setSearchQuery(query);
-
-    // Optional: update URL query param so it's shareable/bookmarkable
     navigate({
       pathname: '/vet-dashboard',
       search: query ? `?search=${encodeURIComponent(query)}` : ''
@@ -71,7 +79,7 @@ export default function Dashboard() {
     if (!window.confirm('Are you sure you want to delete this pet?')) return;
     try {
       await axios.delete(`/animals/${id}`);
-      setPets((prevPets) => prevPets.filter((pet) => pet.id !== id));
+      setPets(prev => prev.filter(pet => pet.id !== id));
     } catch (err) {
       console.error('Error deleting pet:', err);
     }
@@ -82,59 +90,91 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
-      <header>
-        <h1>Welcome Vet, {user?.username || 'Guest'}!</h1>
-        <div className="buttons">
-          <button onClick={goToVaccinations}>Vaccinations</button>
-          <button onClick={handleLogout}>Logout</button>
+    <div className="dashboard-container container py-4">
+      {/* Header */}
+      <header className="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <h1 className="mb-2 mb-md-0">
+          🏥 Welcome to the Veterinary Dashboard,{" "}
+          <span className="text-primary">{user?.username || "Guest"}</span>!
+        </h1>
+        <div className="d-flex gap-2">
+          <button className="btn btn-success" onClick={goToVaccinations}>
+            💉 Vaccinations
+          </button>
+          <button className="btn btn-danger" onClick={handleLogout}>
+            🚪 Logout
+          </button>
         </div>
       </header>
 
-      <SearchBar onSearch={handleSearch} />
+      {/* Search */}
+      <div className="mb-4">
+        <SearchBar onSearch={handleSearch} />
+      </div>
 
-      <section className="pets-section">
-        <h2>All the pets in your clinic</h2>
+      {/* Pets Section */}
+      <section>
+        <h2 className="mb-4">🐾 All the Pets in Your Clinic</h2>
 
         {loading ? (
-          <p>Loading pets...</p>
-        ) : pets.length === 0 ? (
-          <p>No pets registered yet.</p>
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status" />
+            <p className="mt-3">Loading pets...</p>
+          </div>
+        ) : filteredPets.length === 0 ? (
+          <div className="alert alert-info">
+            No pets match your search.
+          </div>
         ) : (
-          <ul className="pet-list">
-            {pets.map((pet) => (
-              <li key={pet.id} className="pet-card">
-                <div className="pet-header">
-                  <h3>{pet.nickname || '(No name)'}</h3>
-                  <div className="pet-actions">
-                    <FaSyringe
-                      className="action-icon add-icon"
-                      title="Vaccines"
-                      onClick={() => handleVaccinations(pet.nickname, pet.id)}
-                    />
-                    <FaCog
-                      className="action-icon"
-                      title="Edit pet"
-                      onClick={() => handleSettings(pet.id)}
-                    />
-                    <FaTrash
-                      className="action-icon delete-icon"
-                      title="Delete pet"
-                      onClick={() => handleDelete(pet.id)}
-                    />
+          <div className="row g-4">
+            {filteredPets.map((pet) => (
+              <div key={pet.id} className="col-sm-6 col-md-4">
+                <div className="card shadow-sm h-100">
+                  <div className="card-body d-flex flex-column">
+                    {/* Pet Header */}
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <h5 className="card-title mb-0">{pet.nickname || "(No name)"}</h5>
+                      <div className="btn-group">
+                        <FaSyringe
+                          className="text-success cursor-pointer"
+                          size={18}
+                          title="Vaccines"
+                          onClick={() => handleVaccinations(pet.nickname, pet.id)}
+                        />
+                        <FaCog
+                          className="text-secondary cursor-pointer"
+                          size={18}
+                          title="Edit Pet"
+                          onClick={() => handleSettings(pet.id)}
+                        />
+                        <FaTrash
+                          className="text-danger cursor-pointer"
+                          size={18}
+                          title="Delete Pet"
+                          onClick={() => handleDelete(pet.id)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Pet Details */}
+                    <ul className="list-unstyled small flex-grow-1">
+                      <li><strong>Species:</strong> {pet.species}</li>
+                      {pet.breed && <li><strong>Breed:</strong> {pet.breed}</li>}
+                      {pet.gender && <li><strong>Gender:</strong> {pet.gender}</li>}
+                      {pet.birth_date && (
+                        <li>
+                          <strong>Birth Date:</strong>{" "}
+                          {new Date(pet.birth_date).toLocaleDateString()}
+                        </li>
+                      )}
+                      {pet.height && <li><strong>Height:</strong> {pet.height} cm</li>}
+                      {pet.weight && <li><strong>Weight:</strong> {pet.weight} kg</li>}
+                    </ul>
                   </div>
                 </div>
-                <p><strong>Species:</strong> {pet.species}</p>
-                {pet.breed && <p><strong>Breed:</strong> {pet.breed}</p>}
-                {pet.gender && <p><strong>Gender:</strong> {pet.gender}</p>}
-                {pet.birth_date && (
-                  <p><strong>Birth Date:</strong> {new Date(pet.birth_date).toLocaleDateString()}</p>
-                )}
-                {pet.height && <p><strong>Height:</strong> {pet.height} cm</p>}
-                {pet.weight && <p><strong>Weight:</strong> {pet.weight} kg</p>}
-              </li>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </section>
     </div>

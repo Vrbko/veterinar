@@ -354,6 +354,29 @@ app.get('/vaccinations/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.get('/vaccinations/vacc/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.query(
+      'SELECT * FROM vaccinations WHERE id = ?',
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Vaccination not found' });
+    }
+
+    // Prevent caching to avoid stale data
+    res.set('Cache-Control', 'no-store');
+
+    // Return single animal
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('Error fetching vaccine:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 app.post('/vaccinations', async (req, res) => {
   const { animal_id, vaccine_type, vaccine_name, vaccination_date, valid_until } = req.body;
   const [result] = await db.query('INSERT INTO vaccinations (animal_id, vaccine_type, vaccine_name, vaccination_date, valid_until) VALUES (?, ?, ?, ?, ?)', [animal_id, vaccine_type, vaccine_name, vaccination_date, valid_until]);
@@ -365,6 +388,7 @@ app.put('/vaccinations/:id', async (req, res) => {
   await db.query('UPDATE vaccinations SET animal_id=?, vaccine_type=?, vaccine_name=?, vaccination_date=?, valid_until=? WHERE id=?', [animal_id, vaccine_type, vaccine_name, vaccination_date, valid_until, id]);
   res.json({ success: true });
 });
+
 app.delete('/vaccinations/:id', async (req, res) => {
   await db.query('DELETE FROM vaccinations WHERE id=?', [req.params.id]);
   res.json({ success: true });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../api/axiosConfig';
 import { useAuth } from '../context/AuthContext';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function AnimalForm() {
   const { user } = useAuth();
@@ -27,23 +27,22 @@ export default function AnimalForm() {
   // Format date for input[type=date]
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
-    return dateString.split('T')[0]; // strip time if ISO format
+    return dateString.split('T')[0];
   };
 
   // Fetch existing pet data if editing
   useEffect(() => {
-      if (!user) return; // wait until user is ready
+    if (!user) return;
 
     if (id) {
       axios.get(`/animals/${id}`)
         .then(res => {
           const pet = res.data;
 
-          // Authorization check: owner or vet only
-          if (pet.user_id !== user?.userId && user?.role !== 'vet') {
+          // Authorization check: owner, admin, or vet
+          if (pet.user_id !== user?.userId && !['admin', 'vet'].includes(user?.role)) {
             setMessage('You are not authorized to edit this pet.');
             setLoading(false);
-            // Redirect after 2 seconds
             setTimeout(() => navigate('/user-dashboard'), 2000);
             return;
           }
@@ -69,7 +68,6 @@ export default function AnimalForm() {
           setTimeout(() => navigate('/dashboard'), 2000);
         });
     } else {
-      // New pet form, no authorization needed
       setLoading(false);
     }
   }, [id, user, navigate]);
@@ -82,47 +80,32 @@ export default function AnimalForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...form,
+        user_id: user?.role === 'admin' ? form.user_id : user?.userId,
+        height: parseFloat(form.height),
+        weight: parseFloat(form.weight)
+      };
+
       if (isNew) {
-        await axios.post('/animals', {
-          ...form,
-          user_id: user?.userId,
-          height: parseFloat(form.height),
-          weight: parseFloat(form.weight)
-        });
+        await axios.post('/animals', payload);
         setMessage('Animal added successfully!');
-          if (user.role === 'vet') {
-    navigate('/vet-dashboard');
-  } else if (user.role === 'admin') {
-    navigate('/admin-dashboard');
-  } else if (user.role === 'owner') {
-    navigate('/user-dashboard');
-  } else {
-    navigate('/login'); // fallback maybe
-  }
       } else {
-        await axios.put(`/animals/${id}`, {
-          ...form,
-          user_id: user?.userId,
-          height: parseFloat(form.height),
-          weight: parseFloat(form.weight)
-        });
-                if (user.role === 'vet') {
-    navigate('/vet-dashboard');
-  } else if (user.role === 'admin') {
-    navigate('/admin-dashboard');
-  } else if (user.role === 'owner') {
-    navigate('/user-dashboard');
-  } else {
-    navigate('/login'); // fallback maybe
-  }
+        await axios.put(`/animals/${id}`, payload);
+        setMessage('Animal updated successfully!');
       }
+
+      // Redirect to proper dashboard
+      if (user.role === 'vet') navigate('/vet-dashboard');
+      else if (user.role === 'admin') navigate('/admin-dashboard');
+      else navigate('/user-dashboard');
+
     } catch (err) {
       console.error(err);
       setMessage(isNew ? 'Error adding pet.' : 'Error updating pet.');
     }
   };
 
-  // Helper to prettify field names
   const prettyLabel = (str) =>
     str
       .split('_')
