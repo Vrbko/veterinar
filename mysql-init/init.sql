@@ -13,7 +13,7 @@ CREATE TABLE owners (
     user_id INT NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    emso CHAR(13) UNIQUE NOT NULL,
+    emso CHAR(13) NOT NULL,
     birth_date DATE NOT NULL,
     email VARCHAR(100),
     phone VARCHAR(20),
@@ -26,7 +26,7 @@ CREATE TABLE animals (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL, -- owner_id je torej user->id
     nickname VARCHAR(30),
-    microchip_number VARCHAR(50) UNIQUE,
+    microchip_number VARCHAR(50),
     species VARCHAR(50) NOT NULL,
     breed VARCHAR(50),
     gender VARCHAR(10),

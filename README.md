@@ -14,7 +14,7 @@ docker-compose up --build
 Ob zagonu Docker okolja se izvede skripta `mysql-init/init.sql`, ki:
 - Ustvari potrebne tabele
 - Napolni bazo z nekaj začetnimi podatki 
-- Ustvari super uporabnika, ki lahko odobri nove veterinare [Admin, Admin]
+- Ustvari super uporabnika, ki lahko odobri nove veterinare [uname: Admin, pass: Admin]
 
 
 ---

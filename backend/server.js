@@ -1,25 +1,3 @@
-/*
-Express server template with MySQL connection - server.js
-
-How to use:
-1. Create a new folder and put this file in it as server.js
-2. Run: npm init -y
-3. Install dependencies:
-   npm install express helmet cors morgan dotenv mysql2
-4. Start:
-   node server.js
-
-Includes:
-- Environment port support (.env via dotenv)
-- MySQL connection (mysql2)
-- Basic security headers (helmet)
-- CORS middleware
-- Request logging (morgan)
-- JSON body parsing
-- Healthcheck and example routes
-- Centralized error handling and graceful shutdown
-*/
-
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -101,14 +79,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Apply auth middleware conditionally
-/*
+// Apply auth middleware conditionally  JWT 
+
 app.use((req, res, next) => {
   if (req.path === '/signup' || req.path === '/login') {
     return next(); // skip auth for these routes
   }
   authenticateJWT(req, res, next);
-});*/
+});
 
 function authenticateJWT(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -242,7 +220,7 @@ app.post('/owners', async (req, res) => {
 app.put('/owners/:id', async (req, res) => {
   const { id } = req.params;
   const { first_name, last_name, emso, birth_date, email, phone, address } = req.body;
-  await db.query('UPDATE owners SET first_name=?, last_name=?, emso=?, birth_date=?, email=?, phone=?, address=? WHERE id=?', [first_name, last_name, emso, birth_date, email, phone, address, id]);
+  await db.query('UPDATE owners SET first_name=?, last_name=?, emso=?, birth_date=?, email=?, phone=?, address=? WHERE user_id=?', [first_name, last_name, emso, birth_date, email, phone, address, id]);
   res.json({ success: true });
 });
 app.delete('/owners/:id', async (req, res) => {
@@ -354,6 +332,31 @@ app.get('/vaccinations/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+app.get('/vaccinations/expire/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.query(
+      `SELECT * 
+       FROM vaccinations 
+       WHERE animal_id = ? 
+       AND valid_until <= DATE_ADD(NOW(), INTERVAL 3 DAY)`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No expiring vaccinations found' });
+    }
+
+    res.set('Cache-Control', 'no-store');
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching vaccine:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 app.get('/vaccinations/vacc/:id', async (req, res) => {
   try {

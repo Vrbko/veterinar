@@ -57,7 +57,7 @@ export default function VaccinationForm() {
         await axios.post('/vaccinations', form);
         setMessage('✅ Vaccination added successfully!');
       }
-      setTimeout(() => navigate('/vet-dashboard'), 1000);
+      setTimeout(() => navigate('/vaccinations'), 1000);
     } catch (err) {
       console.error(err);
       setMessage(isEditMode ? '❌ Error updating vaccination.' : '❌ Error adding vaccination.');

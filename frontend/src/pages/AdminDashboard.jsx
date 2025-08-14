@@ -147,194 +147,214 @@ const filteredAnimals = animals.filter(a => {
   );
 });
 
-
-  return (
-    <div className="dashboard-container container py-4">
-      <header className="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <h1 className="mb-2 mb-md-0">
-          🛠️ Welcome to the Admin Panel,{" "}
-          <span className="text-primary">{user?.username || "Guest"}</span>!
-        </h1>
-        <button className="btn btn-danger" onClick={handleLogout}>🚪 Logout</button>
-      </header>
-
-      <div className="row g-4">
-        {/* Users Table */}
-        <div className="col-lg-6">
-          <section className="card shadow-sm h-100">
-            <div className="card-body">
-              <h2 className="card-title mb-3">👥 User Accounts</h2>
-              <SearchBar onSearch={setUserSearch} />
-              {loadingUsers ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border text-primary" role="status" />
-                  <p className="mt-3">Loading users...</p>
-                </div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="alert alert-info">No users found.</div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>ID</th><th>Username</th><th>Role</th><th>Active?</th><th></th><th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredUsers.map(({ id, username, role, active }) => {
-                        const changedStatus = statusChanges[id];
-                        return (
-                          <tr key={id}>
-                            <td>{id}</td>
-                            <td>{username}</td>
-                            <td>{role}</td>
-                            <td>
-                              <select
-                                className="form-select form-select-sm"
-                                value={changedStatus || active}
-                                onChange={(e) => handleActiveChange(id, e.target.value)}
-                              >
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                              </select>
-                            </td>
-                            <td>
-                              <button
-                                className="btn btn-warning btn-sm"
-                                onClick={() => handleSetActive(id)}
-                                disabled={!statusChanges[id]}
-                              >
-                                Set
-                              </button>
-                            </td>
-                            <td>
-                              <button className="btn btn-danger btn-sm"  onClick={() => handleDeleteUser(id)}>Delete</button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
-{/* Owners Table */}
-        <div className="col-lg-6">
-          <section className="card shadow-sm mb-4">
-            <div className="card-body">
-              <h2 className="card-title mb-3">🏠 Owners</h2>
-              <SearchBar onSearch={setOwnerSearch} />
-              {loadingOwners ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border text-primary" role="status" />
-                </div>
-              ) : filteredOwners.length === 0 ? (
-                <div className="alert alert-info">No owners found.</div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>ID</th><th>Account ID</th><th>First Name</th><th>Last Name</th><th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredOwners.map((o) => (
-                        <tr
-                          key={o.id}
-                          className="cursor-pointer"
-                          onClick={() => navigate(`/register/${o.user_id}`)}
-                        >
-                          <td>{o.id}</td>
-                          <td>{o.user_id}</td>
-                          <td>{o.first_name}</td>
-                          <td>{o.last_name}</td>
-                          <td>
-                            <button
-                              className="btn btn-danger btn-sm"
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent row click
-                                handleDeleteOwner(o.id);
-                              }}
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Animals Table */}
-          <section className="card shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title mb-3">🐾 Animals</h2>
-              <SearchBar onSearch={setAnimalSearch} />
-              {loadingAnimals ? (
-                <div className="text-center py-4">
-                  <div className="spinner-border text-primary" role="status" />
-                </div>
-              ) : filteredAnimals.length === 0 ? (
-                <div className="alert alert-info">No animals found.</div>
-              ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>ID</th><th>Account ID</th><th>Nickname</th><th>Species</th><th>Gender</th><th>Microchip</th><th>💉</th><th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredAnimals.map((a) => (
-                        <tr
-                          key={a.id}
-                          className="cursor-pointer"
-                          onClick={() => navigate(`/pet/${a.id}`)}
-                        >
-                          <td>{a.id}</td>
-                          <td>{a.user_id}</td>
-                          <td>{a.nickname || "(No name)"}</td>
-                          <td>{a.species}</td>
-                          <td>{a.gender}</td>
-                          <td>{a.microchip_number}</td>
-                          <td>
-      <button
-        className="btn btn-danger btn-sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleViewVacc(a.id, a.nickname);
-        }}
-      >
-        💉
+return (
+  <div className="dashboard-container container py-4">
+    {/* Header */}
+    <header className="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3">
+      <h1 className="mb-2 mb-md-0">
+        🛠️ Welcome to the Admin Panel,{" "}
+        <span className="text-primary">{user?.username || "Guest"}</span>!
+      </h1>
+      <button className="btn btn-danger" onClick={handleLogout}>
+        🚪 Logout
       </button>
-    </td>
+    </header>
+
+    <div className="row g-4">
+      {/* Users Table (unchanged) */}
+      <div className="col-lg-6">
+        <section className="card shadow-sm h-100">
+          <div className="card-body">
+            <h2 className="card-title mb-3">👥 User Accounts</h2>
+            <SearchBar onSearch={setUserSearch} />
+            {loadingUsers ? (
+              <div className="text-center py-4">
+                <div className="spinner-border text-primary" role="status" />
+                <p className="mt-3">Loading users...</p>
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="alert alert-info">No users found.</div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>ID</th>
+                      <th>Username</th>
+                      <th>Role</th>
+                      <th>Active?</th>
+                      <th></th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map(({ id, username, role, active }) => {
+                      const changedStatus = statusChanges[id];
+                      return (
+                        <tr key={id}>
+                          <td>{id}</td>
+                          <td>{username}</td>
+                          <td>{role}</td>
+                          <td>
+                            <select
+                              className="form-select form-select-sm"
+                              value={changedStatus || active}
+                              onChange={(e) => handleActiveChange(id, e.target.value)}
+                            >
+                              <option value="yes">Yes</option>
+                              <option value="no">No</option>
+                            </select>
+                          </td>
+                          <td>
+                            <button
+                              className="btn btn-warning btn-sm"
+                              onClick={() => handleSetActive(id)}
+                              disabled={!statusChanges[id]}
+                            >
+                              Set
+                            </button>
+                          </td>
                           <td>
                             <button
                               className="btn btn-danger btn-sm"
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent row click
-                                handleDeleteAnimal(a.id);
-                              }}
+                              onClick={() => handleDeleteUser(id)}
                             >
                               Delete
                             </button>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
-        </div>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* Owners & Animals in second column */}
+      <div className="col-lg-6">
+        {/* Owners Table */}
+        <section className="card shadow-sm mb-4">
+          <div className="card-body">
+            <h2 className="card-title mb-3">🏠 Owners</h2>
+            <SearchBar onSearch={setOwnerSearch} />
+            {loadingOwners ? (
+              <div className="text-center py-4">
+                <div className="spinner-border text-primary" role="status" />
+              </div>
+            ) : filteredOwners.length === 0 ? (
+              <div className="alert alert-info">No owners found.</div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>ID</th>
+                      <th>Account ID</th>
+                      <th>First Name</th>
+                      <th>Last Name</th>
+                      <th>⚙️</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredOwners.map((o) => (
+                      <tr key={o.id}>
+                        <td>{o.id}</td>
+                        <td>{o.user_id}</td>
+                        <td>{o.first_name}</td>
+                        <td>{o.last_name}</td>
+                        <td className="d-flex gap-2">
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => navigate(`/register/${o.user_id}`)}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDeleteOwner(o.id)}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Animals Table */}
+        <section className="card shadow-sm">
+          <div className="card-body">
+            <h2 className="card-title mb-3">🐾 Animals</h2>
+            <SearchBar onSearch={setAnimalSearch} />
+            {loadingAnimals ? (
+              <div className="text-center py-4">
+                <div className="spinner-border text-primary" role="status" />
+              </div>
+            ) : filteredAnimals.length === 0 ? (
+              <div className="alert alert-info">No animals found.</div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>ID</th>
+                      <th>Acc ID</th>
+                      <th>Nickname</th>
+                      <th>Species</th>
+                      <th>Gender</th>
+                      <th>Microchip</th>
+                      <th>💉</th>
+                      <th>⚙️</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAnimals.map((a) => (
+                      <tr key={a.id}>
+                        <td>{a.id}</td>
+                        <td>{a.user_id}</td>
+                        <td>{a.nickname || "(No name)"}</td>
+                        <td>{a.species}</td>
+                        <td>{a.gender}</td>
+                        <td>{a.microchip_number}</td>
+                        <td>
+                          <button
+                            className="btn btn-info btn-sm"
+                            onClick={() => handleViewVacc(a.id, a.nickname)}
+                          >
+                            💉 View
+                          </button>
+                        </td>
+                        <td className="d-flex gap-2">
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => navigate(`/pet/${a.id}`)}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDeleteAnimal(a.id)}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </div>
-  );
+  </div>
+);
 }
