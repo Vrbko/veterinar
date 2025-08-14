@@ -295,8 +295,8 @@ app.post('/animals', async (req, res) => {
 });
 app.put('/animals/:id', async (req, res) => {
   const { id } = req.params;
-  const { user_id, nickname, microchip_number, species, breed, gender, birth_date, height, weight } = req.body;
-  await db.query('UPDATE animals SET user_id=?, nickname=?, microchip_number=?, species=?, breed=?, gender=?, birth_date=?, height=?, weight=? WHERE id=?', [user_id, nickname, microchip_number, species, breed, gender, birth_date, height, weight, id]);
+  const {  nickname, microchip_number, species, breed, gender, birth_date, height, weight } = req.body;
+  await db.query('UPDATE animals SET nickname=?, microchip_number=?, species=?, breed=?, gender=?, birth_date=?, height=?, weight=? WHERE id=?', [ nickname, microchip_number, species, breed, gender, birth_date, height, weight, id]);
   res.json({ success: true });
 });
 app.delete('/animals/:id', async (req, res) => {

@@ -9,8 +9,9 @@ export default function AnimalForm() {
   const { id } = useParams(); // pet id from /pet/:id
   const [isNew, setIsNew] = useState(true);
 
+  const [originalUserId, setOriginalUserId] = useState(''); // store original owner
+
   const [form, setForm] = useState({
-    user_id: user?.userId || '',
     nickname: '',
     microchip_number: '',
     species: '',
@@ -24,13 +25,11 @@ export default function AnimalForm() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Format date for input[type=date]
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
     return dateString.split('T')[0];
   };
 
-  // Fetch existing pet data if editing
   useEffect(() => {
     if (!user) return;
 
@@ -39,7 +38,7 @@ export default function AnimalForm() {
         .then(res => {
           const pet = res.data;
 
-          // Authorization check: owner, admin, or vet
+          // Authorization check
           if (pet.user_id !== user?.userId && !['admin', 'vet'].includes(user?.role)) {
             setMessage('You are not authorized to edit this pet.');
             setLoading(false);
@@ -47,8 +46,8 @@ export default function AnimalForm() {
             return;
           }
 
+          // Populate form WITHOUT changing user_id
           setForm({
-            user_id: pet.user_id || user?.userId || '',
             nickname: pet.nickname || '',
             microchip_number: pet.microchip_number || '',
             species: pet.species || '',
@@ -58,6 +57,8 @@ export default function AnimalForm() {
             height: pet.height || '',
             weight: pet.weight || ''
           });
+
+          setOriginalUserId(pet.user_id); // save original owner
           setIsNew(false);
           setLoading(false);
         })
@@ -80,13 +81,17 @@ export default function AnimalForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // NEVER update user_id on edit
       const payload = {
-        ...form,
-        user_id: user?.role === 'admin' ? form.user_id : user?.userId,
-        height: parseFloat(form.height),
-        weight: parseFloat(form.weight)
-      };
+  ...form,
+  height: parseFloat(form.height),
+  weight: parseFloat(form.weight)
+};
 
+// Only include user_id when creating a new animal
+if (isNew) {
+  payload.user_id = user?.userId;
+}
       if (isNew) {
         await axios.post('/animals', payload);
         setMessage('Animal added successfully!');
@@ -95,7 +100,7 @@ export default function AnimalForm() {
         setMessage('Animal updated successfully!');
       }
 
-      // Redirect to proper dashboard
+      // Redirect
       if (user.role === 'vet') navigate('/vet-dashboard');
       else if (user.role === 'admin') navigate('/admin-dashboard');
       else navigate('/user-dashboard');
@@ -120,7 +125,6 @@ export default function AnimalForm() {
       {message && <p style={{ color: 'red' }}>{message}</p>}
       {(!message || isNew) && (
         <form onSubmit={handleSubmit}>
-
           <div className="form-group" style={{ marginBottom: '1rem' }}>
             <label htmlFor="nickname">{prettyLabel('nickname')}</label>
             <input
